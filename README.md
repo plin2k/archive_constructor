@@ -6,6 +6,7 @@ go run archive_constructor.go '<json>'
 
 
 
+```json
 {
    "archive_name":"name",
    "output_path":"foo/bar",
@@ -70,3 +71,4 @@ go run archive_constructor.go '<json>'
       ]
    }
 }
+```
