@@ -58,35 +58,35 @@ func main() {
 	oData := dataStruct{}
 	json.Unmarshal([]byte(sJSON), &oData)
 
-	StartConstructStructure(&wg,&oSource,sTempFolder,oData.Data)
-	DownloadSources(&wg,&oSource)
+	startConstructStructure(&wg,&oSource,sTempFolder,oData.Data)
+	downloadSources(&wg,&oSource)
 	wg.Wait()
 
-	CreateFolder(oData.OutputPath)
-	ZipWriter(sTempFolder,oData.OutputPath+"/"+oData.ArchiveName+".zip")
+	createFolder(oData.OutputPath)
+	zipWriter(sTempFolder,oData.OutputPath+"/"+oData.ArchiveName+".zip")
 	os.RemoveAll(sTempFolder)
 
 	print(true)
 }
 
-func StartConstructStructure(wg *sync.WaitGroup, oSource *[]sourceStruct, sFolder string, oData folderStruct) {
+func startConstructStructure(wg *sync.WaitGroup, oSource *[]sourceStruct, sFolder string, oData folderStruct) {
 	sFolderNew := sFolder+"/"+oData.Name
-	CreateFolder(sFolderNew)
+	createFolder(sFolderNew)
 
 	for _,oFile := range oData.Sources {
 			*oSource = append(*oSource,sourceStruct{Name:oFile.Name,URL:oFile.URL,Folder:sFolderNew+"/",Extention:oFile.Extention})
 	}
 
 	if oData.Folders != nil {
-		ConstructStructure(wg,oSource,sFolderNew,oData.Folders)
+		constructStructure(wg,oSource,sFolderNew,oData.Folders)
 	}
 }
 
-func ConstructStructure(wg *sync.WaitGroup, oSource *[]sourceStruct, sFolder string, oData []folderStruct) {
+func constructStructure(wg *sync.WaitGroup, oSource *[]sourceStruct, sFolder string, oData []folderStruct) {
 
 	for _,oFolder := range oData {
 		sFolderNew := sFolder+"/"+oFolder.Name
-		CreateFolder(sFolderNew)
+		createFolder(sFolderNew)
 
 		for _,oFile := range oFolder.Sources {
 			*oSource = append(*oSource,sourceStruct{Name:oFile.Name,URL:oFile.URL,Folder:sFolderNew+"/",Extention:oFile.Extention})
@@ -94,21 +94,21 @@ func ConstructStructure(wg *sync.WaitGroup, oSource *[]sourceStruct, sFolder str
 		}
 
 		if oFolder.Folders != nil {
-			ConstructStructure(wg,oSource,sFolderNew,oFolder.Folders)
+			constructStructure(wg,oSource,sFolderNew,oFolder.Folders)
 		}
 	}
 }
 
-func DownloadSources(wg *sync.WaitGroup,oData *[]sourceStruct){
+func downloadSources(wg *sync.WaitGroup,oData *[]sourceStruct){
 
 	for _,oSource := range *oData {
 		wg.Add(1)
-		go DownloadFile(wg,oSource.Folder+oSource.Name+"."+oSource.Extention,oSource.URL)
+		go downloadFile(wg,oSource.Folder+oSource.Name+"."+oSource.Extention,oSource.URL)
 	}
 }
 
 
-func DownloadFile(wg *sync.WaitGroup,filepath string, url string) error {
+func downloadFile(wg *sync.WaitGroup,filepath string, url string) error {
 	defer wg.Done()
 
 	resp, err := http.Get(url)
@@ -128,7 +128,7 @@ func DownloadFile(wg *sync.WaitGroup,filepath string, url string) error {
 
 }
 
-func CreateFolder(sPath string){
+func createFolder(sPath string){
 	_, err := os.Stat(sPath)
  
 	if os.IsNotExist(err) {
@@ -140,7 +140,7 @@ func CreateFolder(sPath string){
 	}
 }
 
-func ZipWriter(baseFolder, sOutput string) {
+func zipWriter(baseFolder, sOutput string) {
 
     outFile, err := os.Create(sOutput)
     if err != nil {
